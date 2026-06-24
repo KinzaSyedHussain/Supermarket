@@ -16,11 +16,11 @@ const product_list = [
 ]
 
 const currency_tags = [
-    { id: 'bill-50', value: 50, className: 'money-tag-50' },
-    { id: 'bill-20', value: 20, className: 'money-tag-20' },
-    { id: 'bill-5', value: 5, className: 'money-tag-5' },
-    { id: 'coin-2', value: 2, className: 'money-tag-2' },
-    { id: 'coin-1', value: 1, className: 'money-tag-1' },
+    { id: 'bill-50', value: 50, img:'fifty.png', label: '$50', isCoin: false },
+    { id: 'bill-20', value: 20, img: 'twenty.png', label: '$20', isCoin: false },
+    { id: 'bill-5', value: 5, img: 'five.png', label: '$5', isCoin: false },
+    { id: 'coin-2', value: 2, img: 'two.png', label: '$2', isCoin: true },
+    { id: 'coin-1', value: 1, img: 'one.png', label: '$1', isCoin:true },
 ]
 
 export default function SupermarketGame() {
@@ -79,6 +79,9 @@ export default function SupermarketGame() {
         <div className="supermarket">
             <header className="mainheader">
                 <h1>🛒 SUPERMARKET</h1>
+                <button className="utility-button destructive-reset" onClick={restartRegister}> 
+                  Resest Store System 
+                </button>
             </header>
 
             <main className="foodsection">
@@ -100,13 +103,9 @@ export default function SupermarketGame() {
                 <section className="controlsidebar">
                     <div className="posterminal">
                         <h3>📟 MONITOR SCREEN</h3>
-
                         <div className="digitaldisplay">
                           {!isPayingPhase ? (
-                            <>
-                              {terminalText}
-                              {`n\n\Items in Basket: ${trolley.length}\nTotal Bill: $${totalCost}`}
-                            </>
+                            `${terminalText}\n\nItems scanned: ${trolley.length}\nTotal Bill: $${totalCost}`
                           ) : balanceRemaining > 0 ? (
                             `=== OUTSTANDING BALANCE ===\nTotal Due: $${totalCost}\nDeposited: $${cashReceived}\nRemaining: $${balanceRemaining}\n\n👉 Drag cash items into the register drawer below!`
                           ) : (  
@@ -116,17 +115,17 @@ export default function SupermarketGame() {
 
                         {!isPayingPhase ? (
                             <div
-                                className="counterscanner"
+                                className="counterscanner counter-closed"
                                 onDragOver={(e) => e.preventDefault()}
                                 onDrop={onScanDrop}
                             >
                                 <img src="COUNTER.png" alt="Register" className="countergraphics" />
-                                <img src="laserbeam.png" alt="Laser scanner gun" className="scannergun" />
+                                <img src="laserbeam.png" alt="Scanner gun" className="scannergun" />
                                 <div className="laserbeamline"></div>
                             </div>
                         ) : (
                             <div 
-                            className="counterscanner"
+                            className="counterscanner counter-open"
                               onDragOver={(e) => e.preventDefault()}
                               onDrop={onDrawerDrop}
                             >
@@ -138,57 +137,48 @@ export default function SupermarketGame() {
                 )}
             </div>
 
-            <div className="lowercounter">
-                <div className="trolleycartzone">
-                    <header className="cartheader">
-                      <h3>🧺 Current Trolley</h3>
-                      {!isPayingPhase && trolley.length > 0 && (
-                        <button className="paytriggertag" onClick={() => setIsPayingPhase(true)}>
-                            Bill Tag →
-                        </button>
-                      )}
-                    </header>
+            {isPayingPhase && (
+                <div className="registerdrawer drawer-animated-entrance">
+                  <div className="moneytagwallet">
+                    {currency_tags.map((tag) => (
+                      <div
+                        key={tag.id}
+                        className="moneytagelement"
+                        draggable={balanceRemaining > 0}
+                        onDragStart={(e) => onDragStart(e, tag.id, 'money')}
+                      >
+                        <img src={tag.img} alt={tag.label} className={tag.isCoin ? "cash-coin-asset" : "cash-bill-asset"} />
+                        <span className="cash-tag-label">{tag.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+            )}
+        </section>
+
+        <div className="lowercounter">
+            <div className="trolleycartzone">
+                <header className="cartheader">
+                  <h3>🧺 Current Trolley</h3>
+                  {!isPayingPhase && trolley.length > 0 && (
+                    <button className="paytriggertag bill-btn" onClick={() => setIsPayingPhase(true)}>
+                        Bill Tag →
+                    </button>
+                  )}
+                </header>
+                <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
+                    <img src="TROLLEY.png" alt="Cart Graphic" className="trolleywatermark" />
                     <div className="trolleygrid">
                       {trolley.map((item, index) => (
                         <div key={index} className="griditem">
-                          <img src={item.img} alt="basket item copy" />
+                          <img src={item.img} alt="items in cart" />
                         </div>
                       ))}
                     </div>
-                    <img src="TROLLEY.PNG" alt="Cart Base Indicator" className="trolleywatermark" />
+                  </div>
                 </div>
-
-                {isPayingPhase && (
-                    <div className="registerdrawer">
-                      <div className="moneytagwallet">
-                        {currency_tags.map((tag) => (
-                           <div
-                             key={tag.id}
-                             className={`moneytagelement ${tag.className}`}
-                             draggable={balanceRemaining > 0}
-                             onDragStart={(e) => onDragStart(e, tag.id, 'money')}
-                            />
-                        ))}
-                      </div>
-
-                      <div
-                        className={`drawertraytarget ${balanceRemaining <= 0 ? 'is-close' : 'is-open'}`}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={onDrawerDrop}
-                       >
-                        <div className="tray-inner-label">
-                            <p>{balanceRemaining > 0 ? "📥 DROP MONEY TAGS HERE" : "DRAWER LOCKE"}</p>
-                       </div>
-                    </div>
-                </div>
-                )}
               </div>
-
-              <button className="utility-button destructive-reset" onClick={restartRegister}>
-                Reset Store System
-              </button>
-            </section>
-           </main>
+            </main>
         </div>
-    )
+    );
 }
