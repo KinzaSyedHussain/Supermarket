@@ -78,7 +78,7 @@ export default function SupermarketGame() {
     return (
         <div className="supermarket">
             <header className="mainheader">
-                <h1>🛒 SUPERMARKET</h1>
+                <h1>🛒 FASTMARKET</h1>
                 <button className="utility-button destructive-reset" onClick={restartRegister}> 
                   Resest Store System 
                 </button>
